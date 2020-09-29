@@ -1,0 +1,86 @@
+---
+output: html_document
+pagetitle: "Classical music recordings"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+library(tidyverse) ; library(httr) ; library(readxl) ; library(janitor) ; library(reactable) ; library(htmltools)
+
+url <- "http://downloads.bbc.co.uk/radio3/building_a_library/BAL_Database_2020.xlsx"
+GET(url, write_disk(tmp <- tempfile(fileext = ".xlsx")))
+
+df <- read_xlsx(tmp, sheet = 1) %>% 
+  clean_names() %>% 
+  select(-10) %>% 
+  filter(!is.na(podcast_link_if_available)) %>% 
+  mutate(composer = str_c("<a href='https://www.oxfordmusiconline.com/search?q=", str_remove(composer, ",")  , "'target='_blank'>", composer, "</a>"),
+         podcast = ifelse(is.na(podcast_link_if_available), "", str_c("<a href='", podcast_link_if_available, "'target='_blank'>", podcast_link_if_available, "</a>"))) %>% 
+  select(composer, piece, top_recommendation, also_recommended_1 = also_recommended_6, also_recommended_2 = also_recommended_7, also_recommended_3 = also_recommended_8, podcast) %>% 
+  pivot_longer(-c(composer, piece, top_recommendation, podcast), values_to = "also_recommended") %>% 
+  select(composer, piece, top_recommendation, also_recommended, podcast) %>% 
+  mutate_at(vars(top_recommendation, podcast), funs(replace(., duplicated(.), NA))) %>% 
+  filter_at(vars(top_recommendation, also_recommended), any_vars(!is.na(.)))
+```
+
+```{r, table}
+tbl <- reactable(df,
+                 height = 700,
+                 pagination = FALSE,
+                 fullWidth = TRUE,
+                 bordered = TRUE,
+                 highlight = TRUE,
+                 resizable = TRUE,
+                 wrap = TRUE,
+                 defaultSorted = c("composer", "piece"),
+                 defaultSortOrder = "asc",
+                 searchable = FALSE,
+                 groupBy = c("composer", "piece"),
+                 defaultColDef = colDef(headerClass = "header", align = "left"),
+                 columns = list(
+                   composer = colDef(name = "Composer", filterable = TRUE, html = TRUE),
+                   piece = colDef(name = "Piece", filterable = TRUE),
+                   top_recommendation = colDef(name = "Top recommendation"),
+                   also_recommended = colDef(name = "Also recommended"),
+                   podcast = colDef(name = "Podcast", html = TRUE)
+                   )
+                 )
+```
+
+```{css}
+@import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
+
+.recordings {
+  font-family: 'Lato', sans-serif;
+  font-size: 14px;
+}
+
+.title {
+  margin: 18px 0;
+  font-size: 16px;
+}
+
+.caption {
+  text-align: right;
+  font-size: 14px;
+  color: #212121;
+}
+
+.header {
+  background-color: hsl(213, 45%, 97%);
+  border-bottom-color: hsl(213, 33%, 93%);
+  border-bottom-width: 1px;
+  color: hsl(213, 13%, 33%);
+}
+```
+
+```{r, ui}
+div(class = "recordings",
+  div(class = "title",
+    h2("Search for recommended classical music recordings"),
+  ),
+  tbl,
+  div(class = "caption", p("Source: ", a("BBC Radio 3 Building a Library", href = 'https://www.bbc.co.uk/programmes/b06w2121', target = "_blank"), "database"))
+)
+```
