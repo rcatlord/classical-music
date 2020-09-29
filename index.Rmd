@@ -37,13 +37,15 @@ tbl <- reactable(df,
                  defaultSortOrder = "asc",
                  searchable = FALSE,
                  groupBy = c("composer", "piece"),
+                 onClick = "expand",
+                 rowStyle = list(cursor = "pointer"),
                  defaultColDef = colDef(headerClass = "header", align = "left"),
                  columns = list(
-                   composer = colDef(name = "Composer", filterable = TRUE, html = TRUE),
+                   composer = colDef(name = "Composer", filterable = TRUE, html = TRUE, width = 250),
                    piece = colDef(name = "Piece", filterable = TRUE),
-                   top_recommendation = colDef(name = "Top recommendation"),
-                   also_recommended = colDef(name = "Also recommended"),
-                   podcast = colDef(name = "Podcast", html = TRUE)
+                   top_recommendation = colDef(name = "Top recommendation", sortable = FALSE),
+                   also_recommended = colDef(name = "Also recommended", sortable = FALSE),
+                   podcast = colDef(name = "Podcast", html = TRUE, sortable = FALSE)
                    )
                  )
 ```
