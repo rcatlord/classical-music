@@ -8,28 +8,28 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 library(tidyverse) ; library(httr) ; library(readxl) ; library(janitor) ; library(reactable) ; library(htmltools) ; library(crosstalk)
 
-url <- "http://downloads.bbc.co.uk/radio3/building_a_library/BAL_Database_2020.xlsx"
+url <- "https://downloads.bbc.co.uk/radio3/building_a_library/R3_BAL_1999-2023.xlsx"
 GET(url, write_disk(tmp <- tempfile(fileext = ".xlsx")))
 
 df <- read_xlsx(tmp, sheet = 1) %>% 
   clean_names() %>% 
   select(-10) %>% 
-  filter(!is.na(podcast_link_if_available)) %>% 
-  mutate(podcast = str_c("<a href='", podcast_link_if_available, "'target='_blank'>", podcast_link_if_available, "</a>")) %>% 
-  select(composer, piece, top_recommendation, also_recommended_1 = also_recommended_6, also_recommended_2 = also_recommended_7, also_recommended_3 = also_recommended_8, podcast) %>% 
-  pivot_longer(-c(composer, piece, top_recommendation, podcast), values_to = "also_recommended") %>% 
-  select(composer, piece, top_recommendation, also_recommended, podcast) %>% 
+  mutate(date = as.Date(date, format = "%d/%m/%y"),
+         podcast = str_c("<a href='", podcast_link_if_available, "'target='_blank'>", podcast_link_if_available, "</a>")) %>% 
+  select(composer, piece, top_recommendation, also_recommended_1 = also_recommended_6, also_recommended_2 = also_recommended_7, also_recommended_3 = also_recommended_8, date, podcast) %>% 
+  pivot_longer(-c(composer, piece, top_recommendation, date, podcast), values_to = "also_recommended") %>% 
+  select(composer, piece, top_recommendation, also_recommended, date, podcast) %>% 
   mutate_at(vars(top_recommendation, podcast), funs(replace(., duplicated(.), NA))) %>% 
   filter_at(vars(top_recommendation, also_recommended), any_vars(!is.na(.)))
 
-sd <- SharedData$new(df, group = "podcast")
+sd <- SharedData$new(df, group = "date")
 sd_tbl <- select(df, -composer) %>%
-  SharedData$new(group = "podcast")
+  SharedData$new(group = "date")
 ```
 
 ```{r, table}
 tbl <- reactable(sd_tbl,
-                 defaultPageSize = 5,
+                 defaultPageSize = 10,
                  pagination = TRUE,
                  compact = TRUE,
                  bordered = TRUE,
@@ -41,28 +41,22 @@ tbl <- reactable(sd_tbl,
                  searchable = FALSE,
                  groupBy = "piece",
                  onClick = "expand",
-                 style = list(background = "#F7F7F7"),
                  rowStyle = list(cursor = "pointer"),
                  defaultColDef = colDef(align = "left"),
                  columns = list(
                    piece = colDef(name = "Piece"),
                    top_recommendation = colDef(name = "Top recommendation", sortable = FALSE),
                    also_recommended = colDef(name = "Also recommended", sortable = FALSE),
+                   date = colDef(name = "Date broadcast"),
                    podcast = colDef(name = "Podcast", html = TRUE, sortable = FALSE)
                    )
                  )
 ```
 
-``` {css}
-body {
-  background-color: #F7F7F7;
-}
-```
-
 ```{r, ui}
 div(
-  h2("Search for recommended classical music recordings"),
-  p("Source: ", a("BBC Radio 3 Building a Library", href = 'https://www.bbc.co.uk/programmes/b06w2121', target = "_blank"), "database"),
+  h2("Recommended classical music recordings"),
+  p("from BBC Radio 3's", a("Building a Library", href = 'https://www.bbc.co.uk/programmes/b06w2121', target = "_blank"), "database"),
   br(),
   bscols(
     widths = c(3, 9),
