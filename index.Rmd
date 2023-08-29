@@ -29,7 +29,7 @@ sd_tbl <- select(df, -composer) %>%
 
 ```{r, table}
 tbl <- reactable(sd_tbl,
-                 defaultPageSize = 5,
+                 defaultPageSize = 10,
                  pagination = TRUE,
                  compact = TRUE,
                  bordered = TRUE,
