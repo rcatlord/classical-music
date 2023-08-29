@@ -29,7 +29,7 @@ sd_tbl <- select(df, -composer) %>%
 
 ```{r, table}
 tbl <- reactable(sd_tbl,
-                 defaultPageSize = 10,
+                 defaultPageSize = 5,
                  pagination = TRUE,
                  compact = TRUE,
                  bordered = TRUE,
@@ -47,7 +47,7 @@ tbl <- reactable(sd_tbl,
                    piece = colDef(name = "Piece"),
                    top_recommendation = colDef(name = "Top recommendation", sortable = FALSE),
                    also_recommended = colDef(name = "Also recommended", sortable = FALSE),
-                   date = colDef(name = "Date broadcast"),
+                   date = colDef(name = "Date"),
                    podcast = colDef(name = "Podcast", html = TRUE, sortable = FALSE)
                    )
                  )
@@ -58,12 +58,7 @@ div(
   h2("Recommended classical music recordings"),
   p("from BBC Radio 3's", a("Building a Library", href = 'https://www.bbc.co.uk/programmes/b06w2121', target = "_blank"), "database"),
   br(),
-  bscols(
-    widths = c(3, 9),
-    list(
-      filter_select("composer", "Composer", sd, ~composer, multiple = FALSE)
-    ),
-    tbl
+  filter_select("composer", "Composer", sd, ~composer, multiple = FALSE),
+  tbl
   )
-)
 ```
