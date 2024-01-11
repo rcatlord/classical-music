@@ -13,23 +13,22 @@ GET(url, write_disk(tmp <- tempfile(fileext = ".xlsx")))
 
 df <- read_xlsx(tmp, sheet = 1) %>% 
   clean_names() %>% 
-  select(-10) %>% 
-  mutate(date = as.Date(date, format = "%d/%m/%y"),
-         podcast = str_c("<a href='", podcast_link_if_available, "'target='_blank'>", podcast_link_if_available, "</a>")) %>% 
-  select(composer, piece, top_recommendation, also_recommended_1 = also_recommended_6, also_recommended_2 = also_recommended_7, also_recommended_3 = also_recommended_8, date, podcast) %>% 
-  pivot_longer(-c(composer, piece, top_recommendation, date, podcast), values_to = "also_recommended") %>% 
-  select(composer, piece, top_recommendation, also_recommended, date, podcast) %>% 
-  mutate_at(vars(top_recommendation, podcast), funs(replace(., duplicated(.), NA))) %>% 
+  select(-x10) %>% 
+  mutate(podcast = str_c("<a href='", podcast_link_if_available, "'target='_blank'>", podcast_link_if_available, "</a>")) %>% 
+  select(composer, piece, top_recommendation, starts_with("also_recommended"), date, reviewer, podcast) %>% 
+  pivot_longer(-c(composer, piece, top_recommendation, date, reviewer, podcast), values_to = "also_recommended") %>% 
+  select(composer, piece, top_recommendation, also_recommended, date, reviewer, podcast) %>% 
+  mutate_at(vars(top_recommendation, date, reviewer, podcast), funs(replace(., duplicated(.), NA))) %>% 
   filter_at(vars(top_recommendation, also_recommended), any_vars(!is.na(.)))
 
-sd <- SharedData$new(df, group = "date")
+sd <- SharedData$new(df, group = "podcast")
 sd_tbl <- select(df, -composer) %>%
-  SharedData$new(group = "date")
+  SharedData$new(group = "podcast")
 ```
 
 ```{r, table}
 tbl <- reactable(sd_tbl,
-                 defaultPageSize = 10,
+                 #defaultPageSize = 5,
                  pagination = TRUE,
                  compact = TRUE,
                  bordered = TRUE,
@@ -41,13 +40,15 @@ tbl <- reactable(sd_tbl,
                  searchable = FALSE,
                  groupBy = "piece",
                  onClick = "expand",
+                 #style = list(background = "#F7F7F7"),
                  rowStyle = list(cursor = "pointer"),
                  defaultColDef = colDef(align = "left"),
                  columns = list(
                    piece = colDef(name = "Piece"),
                    top_recommendation = colDef(name = "Top recommendation", sortable = FALSE),
                    also_recommended = colDef(name = "Also recommended", sortable = FALSE),
-                   date = colDef(name = "Date"),
+                   date = colDef(name = "Date", format = colFormat(date = TRUE, locales = "en-GB")),
+                   reviewer = colDef(name = "Reviewer", sortable = FALSE),
                    podcast = colDef(name = "Podcast", html = TRUE, sortable = FALSE)
                    )
                  )
@@ -55,10 +56,15 @@ tbl <- reactable(sd_tbl,
 
 ```{r, ui}
 div(
-  h2("Recommended classical music recordings"),
-  p("from BBC Radio 3's", a("Building a Library", href = 'https://www.bbc.co.uk/programmes/b06w2121', target = "_blank"), "database"),
+  h2("Search for recommended classical music recordings"),
+  p("Source: ", a("BBC Radio 3 Building a Library", href = 'https://www.bbc.co.uk/programmes/b06w2121', target = "_blank"), "database"),
   br(),
-  filter_select("composer", "Composer", sd, ~composer, multiple = FALSE),
-  tbl
+  bscols(
+    widths = c(3, 9),
+    list(
+      filter_select("composer", "Composer", sd, ~composer, multiple = FALSE)
+    ),
+    tbl
   )
+)
 ```
