@@ -28,7 +28,7 @@ sd_tbl <- select(df, -composer) %>%
 
 ```{r, table}
 tbl <- reactable(sd_tbl,
-                 #defaultPageSize = 5,
+                 defaultPageSize = 10,
                  pagination = TRUE,
                  compact = TRUE,
                  bordered = TRUE,
@@ -38,15 +38,18 @@ tbl <- reactable(sd_tbl,
                  defaultSorted = "piece",
                  defaultSortOrder = "asc",
                  searchable = FALSE,
+                 filterable = TRUE,
                  groupBy = "piece",
                  onClick = "expand",
-                 #style = list(background = "#F7F7F7"),
                  rowStyle = list(cursor = "pointer"),
-                 defaultColDef = colDef(align = "left"),
+                 defaultColDef = colDef(
+                   align = "left",
+                   headerStyle = list(background = "#f7f7f8")
+                   ),
                  columns = list(
-                   piece = colDef(name = "Piece"),
-                   top_recommendation = colDef(name = "Top recommendation", sortable = FALSE),
-                   also_recommended = colDef(name = "Also recommended", sortable = FALSE),
+                   piece = colDef(name = "Work", minWidth = 240),
+                   top_recommendation = colDef(name = "Favourite recording", sortable = FALSE),
+                   also_recommended = colDef(name = "Recommended", sortable = FALSE),
                    date = colDef(name = "Date", format = colFormat(date = TRUE, locales = "en-GB")),
                    reviewer = colDef(name = "Reviewer", sortable = FALSE),
                    podcast = colDef(name = "Podcast", html = TRUE, sortable = FALSE)
