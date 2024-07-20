@@ -48,11 +48,11 @@ tbl <- reactable(sd_tbl,
                    ),
                  columns = list(
                    piece = colDef(name = "Work", minWidth = 240),
-                   top_recommendation = colDef(name = "Favourite recording", sortable = FALSE),
-                   also_recommended = colDef(name = "Recommended", sortable = FALSE),
-                   date = colDef(name = "Date", format = colFormat(date = TRUE, locales = "en-GB")),
-                   reviewer = colDef(name = "Reviewer", sortable = FALSE),
-                   podcast = colDef(name = "Podcast", html = TRUE, sortable = FALSE)
+                   top_recommendation = colDef(name = "Favourite recording", sortable = FALSE, filterable = FALSE),
+                   also_recommended = colDef(name = "Recommended", sortable = FALSE, filterable = FALSE),
+                   date = colDef(name = "Date", format = colFormat(date = TRUE, locales = "en-GB"), sortable = FALSE, filterable = FALSE),
+                   reviewer = colDef(name = "Reviewer", sortable = FALSE, filterable = FALSE),
+                   podcast = colDef(name = "Podcast", html = TRUE, sortable = FALSE, filterable = FALSE)
                    )
                  )
 ```
