@@ -1,12 +1,8 @@
 ---
 pagetitle: "Classical music recordings"
-format:
-  html:
-    embed-resources: true
-execute: 
-  echo: false
-  message: false
-  warning: false
+format: html
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{ojs}
