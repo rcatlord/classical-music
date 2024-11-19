@@ -8,7 +8,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 library(tidyverse) ; library(httr) ; library(readxl) ; library(janitor) ; library(reactable) ; library(htmltools) ; library(crosstalk)
 
-url <- "https://downloads.bbc.co.uk/radio3/building_a_library/R3_BAL_1999-2023.xlsx"
+url <- "https://downloads.bbc.co.uk/radio3/building_a_library/BAL_1999-2024_V2.xlsx"
 GET(url, write_disk(tmp <- tempfile(fileext = ".xlsx")))
 
 df <- read_xlsx(tmp, sheet = 1) %>% 
@@ -48,8 +48,8 @@ tbl <- reactable(sd_tbl,
                    ),
                  columns = list(
                    piece = colDef(name = "Work", minWidth = 240),
-                   top_recommendation = colDef(name = "Favourite recording", sortable = FALSE, filterable = FALSE),
-                   also_recommended = colDef(name = "Recommended", sortable = FALSE, filterable = FALSE),
+                   top_recommendation = colDef(name = "Top recommendaton", sortable = FALSE, filterable = FALSE),
+                   also_recommended = colDef(name = "Also recommended", sortable = FALSE, filterable = FALSE),
                    date = colDef(name = "Date", format = colFormat(date = TRUE, locales = "en-GB"), sortable = FALSE, filterable = FALSE),
                    reviewer = colDef(name = "Reviewer", sortable = FALSE, filterable = FALSE),
                    podcast = colDef(name = "Podcast", html = TRUE, sortable = FALSE, filterable = FALSE)
