@@ -1,6 +1,0 @@
-project:
-  title: "Classical music recordings"
-execute:
-  echo: false
-  message: false
-  warning: false
